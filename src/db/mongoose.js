@@ -5,7 +5,7 @@ const databaseName = "task-manager-api"
 mongoose.connect(connectionURL + "/" + databaseName)
 
 
-
+//  mongoose model
 const User = mongoose.model('User', {
     name: {
         type: String
@@ -15,9 +15,10 @@ const User = mongoose.model('User', {
     }
 })
 
+
 const me = new User({
-    name: "Armant",
-    age: 31
+    name: "bob",
+    age: 56
 })
 
 me.save()
@@ -27,3 +28,26 @@ me.save()
     .catch(function (error) {
         console.log(error)
     })
+
+//  mongoose model
+const Task = mongoose.model('Task', {
+    description: {
+        type: String
+    },
+    completed: {
+        type: Boolean
+    }
+})
+
+const task = new Task({
+    description: "to do 1",
+    completed: false
+})
+
+task.save()
+    .then(function (result) {
+        console.log(result)
+    })
+    .catch(function (error) {
+        console.log(error)
+    }) 
