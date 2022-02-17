@@ -21,8 +21,13 @@ router.post('/tasks', auth, async function (req, res) {
 //only owner of task can access it, NOT admin or anyone else
 router.get('/tasks', auth, async function (req, res) {
     const match1 = {}
+    const sort1 = {}
     if (req.query.completed) {
         match1.completed = req.query.completed === "true"
+    }
+    if (req.query.sortBy) {
+        const parts = req.query.sortBy.split(":")
+        sort1[parts[0]] = parts[1] === 'desc' ? -1 : 1
     }
     try {
         //const tasks = await Task.find({})
@@ -32,7 +37,8 @@ router.get('/tasks', auth, async function (req, res) {
             match: match1,
             options: {
                 limit: parseInt(req.query.limit),
-                skip: parseInt(req.query.skip)
+                skip: parseInt(req.query.skip),
+                sort: sort1
             }
         })
         //res.send(tasks)
