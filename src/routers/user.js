@@ -26,6 +26,28 @@ router.post('/login', async (req, res) => {
     }
 })
 
+router.post('/logout', auth, async function (req, res) {
+    try {
+        req.user.tokens = req.user.tokens.filter(function (token) {
+            return token.token !== req.token
+        })
+        await req.user.save()
+        res.send()
+    } catch (error) {
+        res.status(500), send()
+    }
+})
+
+router.post('/logoutAll', auth, async function (req, res) {
+    try {
+        req.user.tokens = []
+        await req.user.save()
+        res.send()
+    } catch (error) {
+        res.status(500), send()
+    }
+})
+
 router.get('/user/me', auth, async function (req, res) {
     res.send(req.user)
 })
