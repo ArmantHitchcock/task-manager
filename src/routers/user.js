@@ -127,7 +127,6 @@ router.delete('/user/:id', auth, async function (req, res) {
 })
 
 const upload1 = multer({
-    dest: 'avatars',
     limits: {
         fileSize: 4000000
     },
@@ -138,14 +137,21 @@ const upload1 = multer({
         cb(undefined, true)
     }
 })
-router.post('/avatar', upload1.single('avatar'), async function (req, res) {
+router.post('/avatar', auth, upload1.single('avatar'), async function (req, res) {
+    req.user.avatar = req.file.buffer
+    await req.user.save()
     res.send()
 }, (error, req, res, next) => {
     res.status(400).send({ error: error.message })
 })
 
+router.delete('/avatar', auth, async function (req, res) {
+    req.user.avatar = undefined
+    await req.user.save()
+    res.send()
+})
+
 const upload = multer({
-    dest: 'Docs',
     limits: {
         fileSize: 4000000
     },
@@ -156,10 +162,18 @@ const upload = multer({
         cb(undefined, true)
     }
 })
-router.post('/docUpload', upload.single('Docs'), async function (req, res) {
+router.post('/docUpload', auth, upload.single('Docs'), async function (req, res) {
+    req.user.doc = req.file.buffer
+    await req.user.save()
     res.send()
 }, (error, req, res, next) => {
     res.status(400).send({ error: error.message })
+})
+
+router.delete('/docUpload', auth, async function (req, res) {
+    req.user.doc = undefined
+    await req.user.save()
+    res.send()
 })
 
 module.exports = router
