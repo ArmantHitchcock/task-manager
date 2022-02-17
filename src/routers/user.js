@@ -126,11 +126,40 @@ router.delete('/user/:id', auth, async function (req, res) {
     }
 })
 
-const upload = multer({
-    dest: 'avatars'
+const upload1 = multer({
+    dest: 'avatars',
+    limits: {
+        fileSize: 4000000
+    },
+    fileFilter(req, file, cb) {
+        if (!file.originalname.match(/\.(jpg|png|jpeg)$/)) {
+            return cb(new Error('Please upload a png or jpeg'))
+        }
+        cb(undefined, true)
+    }
 })
-router.post('/avatar', upload.single('avatar'), async function (req, res) {
+router.post('/avatar', upload1.single('avatar'), async function (req, res) {
     res.send()
+}, (error, req, res, next) => {
+    res.status(400).send({ error: error.message })
+})
+
+const upload = multer({
+    dest: 'Docs',
+    limits: {
+        fileSize: 4000000
+    },
+    fileFilter(req, file, cb) {
+        if (!file.originalname.match(/\.(doc|docx|pdf)$/)) {
+            return cb(new Error('Please upload a Word Doc or PDF'))
+        }
+        cb(undefined, true)
+    }
+})
+router.post('/docUpload', upload.single('Docs'), async function (req, res) {
+    res.send()
+}, (error, req, res, next) => {
+    res.status(400).send({ error: error.message })
 })
 
 module.exports = router
