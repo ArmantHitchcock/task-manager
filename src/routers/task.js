@@ -20,11 +20,21 @@ router.post('/tasks', auth, async function (req, res) {
 
 //only owner of task can access it, NOT admin or anyone else
 router.get('/tasks', auth, async function (req, res) {
-
+    const match1 = {}
+    if (req.query.completed) {
+        match1.completed = req.query.completed === "true"
+    }
     try {
         //const tasks = await Task.find({})
         //const tasks = await Task.find({owner: req.user._id})
-        await req.user.populate('tasks')
+        await req.user.populate({
+            path: 'tasks',
+            match: match1,
+            options: {
+                limit: parseInt(req.query.limit),
+                skip: parseInt(req.query.skip)
+            }
+        })
         //res.send(tasks)
         res.send(req.user.tasks)
     } catch (error) {
