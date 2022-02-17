@@ -61,7 +61,7 @@ router.get('/users', auth, async function (req, res) {
     }
 })
 
-router.get('/user/:id', async function (req, res) {
+router.get('/user/:id', auth, async function (req, res) {
     const _id = req.params.id
     try {
         const user = await User.findById(_id)
@@ -74,7 +74,7 @@ router.get('/user/:id', async function (req, res) {
     }
 })
 
-router.patch('/users/:id', async function (req, res) {
+router.patch('/users/:id', auth, async function (req, res) {
     const updates = Object.keys(req.body)
     const allowedUpdates = ['name', 'email', 'password', "age"]
     const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
@@ -95,7 +95,25 @@ router.patch('/users/:id', async function (req, res) {
     }
 })
 
-router.delete('/user/:id', async function (req, res) {
+router.patch('/me', auth, async function (req, res) {
+    const updates = Object.keys(req.body)
+    const allowedUpdates = ['name', 'email', 'password', "age"]
+    const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
+    if (!isValidOperation) {
+        res.status(400).send({ error: "Invalid update, only: " + allowedUpdates + " is allowed" })
+    }
+    try {
+        updates.forEach((update) => req.user[update] = req.body[update])
+        await req.user.save()
+        //const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true })
+        res.send(req.user)
+    } catch (error) {
+        res.status(400).send(error)
+    }
+})
+
+
+router.delete('/user/:id', auth, async function (req, res) {
     try {
         const user = await User.findByIdAndDelete(req.params.id)
         if (!user) {
