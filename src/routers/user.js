@@ -3,6 +3,7 @@ const multer = require('multer')
 const router = new express.Router()
 const User = require('../models/user')
 const auth = require('../middleware/auth')
+const { contentType } = require('express/lib/response')
 
 
 router.post('/users', async (req, res) => {
@@ -151,6 +152,19 @@ router.delete('/avatar', auth, async function (req, res) {
     res.send()
 })
 
+router.get('/avatar/:id', async function (req, res) {
+    try {
+        const user = await User.findById(req.params.id)
+        if (!user || !user.avatar) {
+            throw new Error()
+        }
+        res.set('Content-Type', 'image/jpg') //https://www.ibm.com/docs/en/wkc/cloud?topic=catalog-previews
+        res.send(user.avatar)
+    } catch (error) {
+        res.status(404).send()
+    }
+})
+
 const upload = multer({
     limits: {
         fileSize: 4000000
@@ -162,6 +176,7 @@ const upload = multer({
         cb(undefined, true)
     }
 })
+
 router.post('/docUpload', auth, upload.single('Docs'), async function (req, res) {
     req.user.doc = req.file.buffer
     await req.user.save()
@@ -174,6 +189,19 @@ router.delete('/docUpload', auth, async function (req, res) {
     req.user.doc = undefined
     await req.user.save()
     res.send()
+})
+
+router.get('/docUpload/:id', async function (req, res) {
+    try {
+        const user = await User.findById(req.params.id)
+        if (!user || !user.doc) {
+            throw new Error()
+        }
+        res.set('Content-Type', 'application/msword')  //https://www.ibm.com/docs/en/wkc/cloud?topic=catalog-previews
+        res.send(user.doc)
+    } catch (error) {
+        res.status(404).send()
+    }
 })
 
 module.exports = router
