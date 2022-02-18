@@ -1,9 +1,10 @@
 const express = require('express')
 const multer = require('multer')
+const sharp = require('sharp')
 const router = new express.Router()
 const User = require('../models/user')
 const auth = require('../middleware/auth')
-const { contentType } = require('express/lib/response')
+const resize = require('sharp/lib/resize')
 
 
 router.post('/users', async (req, res) => {
@@ -139,7 +140,9 @@ const upload1 = multer({
     }
 })
 router.post('/avatar', auth, upload1.single('avatar'), async function (req, res) {
-    req.user.avatar = req.file.buffer
+    const buffer = await sharp(req.file.buffer).resize({ width: 250, height: 250 }).png().toBuffer()
+    req.user.avatar = buffer
+    //req.user.avatar = req.file.buffer
     await req.user.save()
     res.send()
 }, (error, req, res, next) => {
@@ -158,7 +161,7 @@ router.get('/avatar/:id', async function (req, res) {
         if (!user || !user.avatar) {
             throw new Error()
         }
-        res.set('Content-Type', 'image/jpg') //https://www.ibm.com/docs/en/wkc/cloud?topic=catalog-previews
+        res.set('Content-Type', 'image/png') //https://www.ibm.com/docs/en/wkc/cloud?topic=catalog-previews
         res.send(user.avatar)
     } catch (error) {
         res.status(404).send()
